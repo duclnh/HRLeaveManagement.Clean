@@ -1,5 +1,6 @@
 ﻿
 using HRLeaveManagement.Api.Models;
+using Newtonsoft.Json;
 using System.Net;
 using BadRequestException = HRLeaveManagement.Application.Exceptions.BadRequestException;
 using NotFoundException = HRLeaveManagement.Application.Exceptions.NotFoundException;
@@ -9,10 +10,12 @@ namespace HRLeaveManagement.Api.Middleware
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionMiddleware> _logger;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
         public async Task Invoke(HttpContext httpContext)
         {
@@ -66,6 +69,8 @@ namespace HRLeaveManagement.Api.Middleware
             }
 
             httpContext.Response.StatusCode = (int)statusCode;
+            var logMessage = JsonConvert.SerializeObject(problem);
+            _logger.LogError(ex, logMessage);
             await httpContext.Response.WriteAsJsonAsync(problem);
         }
     }

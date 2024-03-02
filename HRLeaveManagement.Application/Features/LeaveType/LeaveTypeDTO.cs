@@ -1,4 +1,4 @@
-﻿namespace HRLeaveManagement.Application.Features.LeaveType.Queries
+﻿namespace HRLeaveManagement.Application.Features.LeaveType
 {
     public class LeaveTypeDTO
     {
@@ -7,6 +7,6 @@
         public int DefaultDays { get; set; }
 
         public DateTime? DateCreated { get; set; }
-        public DateTime? DateModified { get; set;}
+        public DateTime? DateModified { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using HRLeaveManagement.Application.Features.LeaveType.Queries;
-using MediatR;
+﻿using MediatR;
 
 namespace HRLeaveManagement.Application.Features.LeaveType.Commands.CreateLeaveType
 {

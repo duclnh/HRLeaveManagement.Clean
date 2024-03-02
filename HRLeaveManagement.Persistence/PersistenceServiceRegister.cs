@@ -4,6 +4,7 @@ using HRLeaveManagement.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace HRLeaveManagement.Persistence
 {
@@ -12,7 +13,10 @@ namespace HRLeaveManagement.Persistence
         public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<HrDatabaseContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("ConnectionString"))
+            {
+                options.UseSqlServer(configuration.GetConnectionString("ConnectionString"));
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            }
             );
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

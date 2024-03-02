@@ -13,14 +13,19 @@ namespace HRLeaveManagement.Application.Features.LeaveRequest.Commands.ChangeLea
         private readonly IEmailSender _emailSender;
         private readonly ILeaveRequestRepository _leaveRequestRepository;
         private readonly ILeaveTypeRepository _leaveTypeRepository;
+        private readonly ILeaveAllocationRepository _leaveAllocationRepository;
 
-        public ChangeLeaveRequestApprovalCommandHandler(
-             ILeaveRequestRepository leaveRequestRepository, ILeaveTypeRepository leaveTypeRepository, IMapper mapper, IEmailSender emailSender)
+        public ChangeLeaveRequestApprovalCommandHandler( ILeaveRequestRepository leaveRequestRepository, 
+                                                         ILeaveTypeRepository leaveTypeRepository, 
+                                                         ILeaveAllocationRepository leaveAllocationRepository,
+                                                         IMapper mapper, 
+                                                         IEmailSender emailSender)
         {
             _leaveRequestRepository = leaveRequestRepository;
             _leaveTypeRepository = leaveTypeRepository;
+            _leaveAllocationRepository = leaveAllocationRepository;
             _mapper = mapper;
-            this._emailSender = emailSender;
+            _emailSender = emailSender;
         }
 
         public async Task<Unit> Handle(ChangeLeaveRequestApprovalCommand request, CancellationToken cancellationToken)
@@ -34,18 +39,36 @@ namespace HRLeaveManagement.Application.Features.LeaveRequest.Commands.ChangeLea
             await _leaveRequestRepository.UpdateAsync(leaveRequest);
 
             // if request is approved, get and update the employee's allocations
-
-
-            // send confirmation email
-            var email = new EmailMessage
+            if (request.Approved)
             {
-                To = string.Empty, /* Get email from employee record */
-                Body = $"The approval status for your leave request for {leaveRequest.StartDate:D} to {leaveRequest.EndDate:D} " +
-                        $"has been updated.",
-                Subject = "Leave Request Approval Status Updated"
-            };
+                int daysRequest = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+                var allocation = await _leaveAllocationRepository.GetUserAllocations(leaveRequest.RequestingEmployeeId,leaveRequest.Id);
 
-            await _emailSender.SendEmail(email);
+                if(allocation != null)
+                {
+                    allocation.NumberOfDays -= daysRequest;
+                    await _leaveAllocationRepository.UpdateAsync(allocation);
+                }
+
+            }
+
+            try
+            {
+                // send confirmation email
+                var email = new EmailMessage
+                {
+                    To = string.Empty, /* Get email from employee record */
+                    Body = $"The approval status for your leave request for {leaveRequest.StartDate:D} to {leaveRequest.EndDate:D} " +
+                            $"has been updated.",
+                    Subject = "Leave Request Approval Status Updated"
+                };
+
+                await _emailSender.SendEmail(email);
+            }
+            catch (Exception ex)
+            {
+
+            }
 
             return Unit.Value;
         }

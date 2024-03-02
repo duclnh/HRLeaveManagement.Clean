@@ -24,7 +24,7 @@ namespace HRLeaveManagement.Application.Features.LeaveType.Commands.CreateLeaveT
             _leaveTypeRepository = leaveTypeRepository;
         }
 
-        private async Task<bool> LeaveTypeNameUnique(string name)
+        private async Task<bool> LeaveTypeNameUnique(string name, CancellationToken cancellationToken)
         {
             return await _leaveTypeRepository.IsLeaveTypeUnique(name);
         }

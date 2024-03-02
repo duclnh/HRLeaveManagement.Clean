@@ -1,4 +1,4 @@
-﻿using HRLeaveManagement.Application.Features.LeaveType.Queries;
+﻿using HRLeaveManagement.Application.Features.LeaveType;
 
 namespace HRLeaveManagement.Application.Features.LeaveAllocation
 {

@@ -7,12 +7,14 @@ using HRLeaveManagement.Application.Features.LeaveRequest.Commands.UpdateLeaveRe
 using HRLeaveManagement.Application.Features.LeaveRequest.Queries.GetAllLeaveRequest;
 using HRLeaveManagement.Application.Features.LeaveRequest.Queries.GetLeaveRequestDetail;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HRLeaveManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LeaveRequestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,8 +32,6 @@ namespace HRLeaveManagement.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesDefaultResponseType]
         public async Task<ActionResult<LeaveRequestDTO>> Get(int id)
         {
             var leaveRequest = await _mediator.Send(new GetLeaveRequestDetailQuery { Id = id });

@@ -7,12 +7,12 @@ using HRLeaveManagement.Application.Features.LeaveAllocation.Queries.GetLeaveAll
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace HRLeaveManagement.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LeaveAllocationsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -23,42 +23,40 @@ namespace HRLeaveManagement.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<LeaveAllocationDTO>>> Get(bool isLoggingUser = false, CancellationToken cancellationToken = default)
+        [ProducesResponseType(typeof(List<LeaveAllocationDTO>),StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<LeaveAllocationDTO>>> Get(bool isLoggedInUser = false)
         {
-            var leaveAllocations = await _mediator.Send(new GetAllLeaveAllocationQuery(), cancellationToken);
+            var leaveAllocations = await _mediator.Send(new GetAllLeaveAllocationQuery());
 
             return Ok(leaveAllocations);            
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<List<LeaveAllocationDTO>>> Get(int id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult<List<LeaveAllocationDTO>>> Get(int id)
         {
-            var leaveAllocation = await _mediator.Send(new GetLeaveAllocationDetailsQuery { Id = id}, cancellationToken);
+            var leaveAllocation = await _mediator.Send(new GetLeaveAllocationDetailsQuery { Id = id});
 
             return Ok(leaveAllocation);
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<List<LeaveAllocationDTO>>> Add(CreateLeaveAllocationCommand command , CancellationToken cancellationToken = default)
+        public  async Task<ActionResult> Post(CreateLeaveAllocationCommand command)
         {
-            var response = await _mediator.Send(command, cancellationToken);
+            var response = await _mediator.Send(command);
 
-            return CreatedAtAction(nameof(Get), new {id = response.Id}, response);
+            return CreatedAtAction(nameof(Get), response);
         }
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Update(UpdateLeaveAllocationCommand command, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> Update(UpdateLeaveAllocationCommand command)
         {
-            await _mediator.Send(command, cancellationToken);
+            await _mediator.Send(command);
 
             return NoContent();
         }
@@ -67,9 +65,9 @@ namespace HRLeaveManagement.Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Delete(int id, CancellationToken cancellationToken = default)
+        public async Task<ActionResult> Delete(int id)
         {
-            await _mediator.Send(new DeleteLeaveAllocationCommand { Id = id}, cancellationToken);
+            await _mediator.Send(new DeleteLeaveAllocationCommand { Id = id});
 
             return NoContent();
         }

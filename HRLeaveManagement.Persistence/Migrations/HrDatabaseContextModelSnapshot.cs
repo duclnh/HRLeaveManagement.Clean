@@ -30,6 +30,9 @@ namespace HRLeaveManagement.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
 
@@ -40,8 +43,14 @@ namespace HRLeaveManagement.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("LeaveAllocationId")
+                        .HasColumnType("int");
+
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NumberOfDays")
                         .HasColumnType("int");
@@ -50,6 +59,8 @@ namespace HRLeaveManagement.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LeaveAllocationId");
 
                     b.HasIndex("LeaveTypeId");
 
@@ -64,11 +75,14 @@ namespace HRLeaveManagement.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("Aproved")
+                    b.Property<bool?>("Approved")
                         .HasColumnType("bit");
 
                     b.Property<bool>("Cancelled")
                         .HasColumnType("bit");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
@@ -84,6 +98,9 @@ namespace HRLeaveManagement.Persistence.Migrations
 
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RequestComments")
                         .HasColumnType("nvarchar(max)");
@@ -110,6 +127,9 @@ namespace HRLeaveManagement.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("DateCreated")
                         .HasColumnType("datetime2");
 
@@ -119,6 +139,9 @@ namespace HRLeaveManagement.Persistence.Migrations
                     b.Property<int>("DefaultDays")
                         .HasColumnType("int");
 
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -127,24 +150,18 @@ namespace HRLeaveManagement.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LeaveTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DateCreated = new DateTime(2024, 2, 25, 19, 21, 12, 597, DateTimeKind.Local).AddTicks(7555),
-                            DateModified = new DateTime(2024, 2, 25, 19, 21, 12, 597, DateTimeKind.Local).AddTicks(7565),
-                            DefaultDays = 10,
-                            Name = "Vacation"
-                        });
                 });
 
             modelBuilder.Entity("HRLeaveManagement.Domain.LeaveAllocation", b =>
                 {
+                    b.HasOne("HRLeaveManagement.Domain.LeaveAllocation", null)
+                        .WithMany("leaveAllocations")
+                        .HasForeignKey("LeaveAllocationId");
+
                     b.HasOne("HRLeaveManagement.Domain.LeaveType", "LeaveType")
-                        .WithMany()
+                        .WithMany("leaveAllocations")
                         .HasForeignKey("LeaveTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("LeaveType");
@@ -153,12 +170,24 @@ namespace HRLeaveManagement.Persistence.Migrations
             modelBuilder.Entity("HRLeaveManagement.Domain.LeaveRequest", b =>
                 {
                     b.HasOne("HRLeaveManagement.Domain.LeaveType", "LeaveType")
-                        .WithMany()
+                        .WithMany("leaveRequests")
                         .HasForeignKey("LeaveTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("LeaveType");
+                });
+
+            modelBuilder.Entity("HRLeaveManagement.Domain.LeaveAllocation", b =>
+                {
+                    b.Navigation("leaveAllocations");
+                });
+
+            modelBuilder.Entity("HRLeaveManagement.Domain.LeaveType", b =>
+                {
+                    b.Navigation("leaveAllocations");
+
+                    b.Navigation("leaveRequests");
                 });
 #pragma warning restore 612, 618
         }
